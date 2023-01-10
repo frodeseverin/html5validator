@@ -10,6 +10,8 @@ from typing import List, Tuple, Optional
 import subprocess
 import sys
 import vnujar
+from selenium import webdriver
+import requests
 
 LOGGER = logging.getLogger(__name__)
 
@@ -87,7 +89,7 @@ class Validator:
     def __init__(self,
                  ignore=None, ignore_re=None,
                  errors_only=False, detect_language=True, format=None,
-                 stack_size=None, vnu_args=None):
+                 stack_size=None, vnu_args=None, browser=None, session=None):
         self.ignore = ignore if ignore else []
         self.ignore_re = ignore_re if ignore_re else []
 
@@ -117,6 +119,13 @@ class Validator:
         if sys.platform == 'cygwin':
             self.vnu_jar_location = _cygwin_path_convert(
                 self.vnu_jar_location)
+
+        # Initialize Selenium instance
+        # Default to Chrome Webdriver
+        self.browser = browser if browser else webdriver.Chrome()
+
+        # Initialize requests.session instance
+        self.session = session if session else requests.Session()
 
     def _java_options(self) -> List[str]:
         java_options = []
@@ -196,3 +205,16 @@ class Validator:
         else:
             LOGGER.info('All good.')
         return len(err)
+
+    def transfer_cookies():
+    # function to transfer cookies from the Selenium.webdriver instance to the request.session instance
+    for cookie in self.browser.get_cookies():
+        if 'httpOnly' in cookie:
+            httpO = cookie.pop('httpOnly')
+            cookie['rest'] = {'httpOnly': httpO}
+        if 'expiry' in cookie:
+            cookie['expires'] = cookie.pop('expiry')
+        request.cookies.set(**cookie)
+
+
+
